@@ -11,18 +11,35 @@ $id = $_GET['id'];
 $uid = $_SESSION['user_id'];
 $role = $_SESSION['role'];
 
-// CUSTOMER can only delete own account
+// Restriction
 if ($role != 'admin' && $uid != $id) {
     echo "Access denied";
     exit();
 }
 
-// Delete role tables first
+// Check if user has rentals
+$res = $conn->query("
+SELECT r.* FROM Rental r
+JOIN Customer c ON r.customer_id = c.customer_id
+WHERE c.user_id = $id
+");
+
+if ($res->num_rows > 0) {
+    echo "Cannot delete: User has rental records.";
+    exit();
+}
+
+// Delete roles
 $conn->query("DELETE FROM Admin WHERE user_id=$id");
 $conn->query("DELETE FROM Customer WHERE user_id=$id");
 
 // Delete user
 $conn->query("DELETE FROM User WHERE user_id=$id");
 
-header("Location: ../login.php");
+if ($uid == $id) {
+    session_destroy();
+    header("Location: ../login.php");
+} else {
+    header("Location: view.php");
+}
 ?>

@@ -7,24 +7,29 @@ if ($_POST) {
     $password = $_POST['password'];
     $phone = $_POST['phone'];
 
-    // Insert into User
     $conn->query("INSERT INTO User(name,email,password,phone)
                   VALUES('$name','$email','$password','$phone')");
 
     $user_id = $conn->insert_id;
 
-    // Insert into Customer
     $conn->query("INSERT INTO Customer(user_id) VALUES($user_id)");
 
-    echo "Registration successful! <a href='login.php'>Login</a>";
+    header("Location: login.php");
 }
+
+include 'header.php';
 ?>
 
+<div class="card">
 <h2>Register</h2>
+
 <form method="POST">
-Name: <input name="name"><br>
-Email: <input name="email"><br>
-Password: <input type="password" name="password"><br>
-Phone: <input name="phone"><br>
+<input name="name" placeholder="Name">
+<input name="email" placeholder="Email">
+<input type="password" name="password" placeholder="Password">
+<input name="phone" placeholder="Phone">
 <button>Register</button>
 </form>
+</div>
+
+<?php include 'footer.php'; ?>

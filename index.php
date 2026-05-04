@@ -5,19 +5,24 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
+include 'header.php';
 ?>
 
-<h2>Equipment Rental System</h2>
+<div class="card">
+<h2>Dashboard</h2>
 
-<p>Role: <?php echo $_SESSION['role']; ?></p>
+<p><b>Role:</b> <?php echo $_SESSION['role']; ?></p>
+
+<a href="users/view.php">Users</a><br>
+<a href="category/view.php">Categories</a><br>
+<a href="equipment/view.php">Equipment</a><br>
+<a href="rental/view.php">Rentals</a><br>
+<a href="payment/view.php">Payments</a><br>
+<a href="review/view.php">Reviews</a><br>
+<a href="notification/view.php">Notifications</a><br>
+<br>
 <a href="logout.php">Logout</a>
+</div>
 
-<ul>
-<li><a href="users/view.php">Users</a></li>
-<li><a href="category/view.php">Categories</a></li>
-<li><a href="equipment/view.php">Equipment</a></li>
-<li><a href="rental/view.php">Rentals</a></li>
-<li><a href="payment/view.php">Payments</a></li>
-<li><a href="review/view.php">Reviews</a></li>
-<li><a href="notification/view.php">Notifications</a></li>
-</ul>
+<?php include 'footer.php'; ?>

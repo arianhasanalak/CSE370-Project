@@ -1,23 +1,50 @@
-<?php include '../db.php';
+<?php
+session_start();
+include '../db.php';
+include '../header.php';
 
 $id = $_GET['id'];
 
 if ($_POST) {
     $name = $_POST['name'];
     $price = $_POST['price'];
+    $category = $_POST['category'];
 
-    $sql = "UPDATE Equipment SET name='$name', pay_per_day='$price' WHERE e_id=$id";
-    $conn->query($sql);
+    $conn->query("UPDATE Equipment 
+                  SET name='$name', pay_per_day='$price', category_id='$category'
+                  WHERE e_id=$id");
 
     header("Location: view.php");
+    exit();
 }
 
-$result = $conn->query("SELECT * FROM Equipment WHERE e_id=$id");
-$row = $result->fetch_assoc();
+$res = $conn->query("SELECT * FROM Equipment WHERE e_id=$id");
+$row = $res->fetch_assoc();
+
+$cat = $conn->query("SELECT * FROM Category");
 ?>
 
+<div class="card">
+<h2>Edit Equipment</h2>
+
 <form method="POST">
-Name: <input name="name" value="<?php echo $row['name']; ?>"><br>
-Price: <input name="price" value="<?php echo $row['pay_per_day']; ?>"><br>
+<input name="name" value="<?php echo $row['name']; ?>">
+<input name="price" value="<?php echo $row['pay_per_day']; ?>">
+
+<select name="category">
+<?php while($c = $cat->fetch_assoc()) { ?>
+<option value="<?php echo $c['category_id']; ?>"
+<?php if($c['category_id'] == $row['category_id']) echo "selected"; ?>>
+<?php echo $c['category_name']; ?>
+</option>
+<?php } ?>
+</select>
+
 <button>Update</button>
 </form>
+
+<br>
+<a href="view.php">Back</a>
+</div>
+
+<?php include '../footer.php'; ?>

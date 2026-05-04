@@ -1,16 +1,41 @@
-<?php include '../db.php';
+<?php
+session_start();
+include '../db.php';
+include '../header.php';
 
-$sql = "
-SELECT u.name, e.name AS equipment, r.rating
-FROM Review r
-JOIN Customer c ON r.customer_id = c.customer_id
-JOIN User u ON c.user_id = u.user_id
-JOIN Equipment e ON r.equipment_id = e.e_id
-";
-
-$result = $conn->query($sql);
-
-while($row = $result->fetch_assoc()) {
-    echo $row['name']." rated ".$row['equipment']." (".$row['rating'].")<br>";
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
 }
 ?>
+
+<div class="card">
+<h2>Equipment Ratings</h2>
+
+<table>
+<tr>
+<th>Equipment</th>
+<th>Average Rating</th>
+</tr>
+
+<?php
+$res = $conn->query("
+SELECT e.name, AVG(r.rating) AS avg_rating
+FROM Review r
+JOIN Equipment e ON r.equipment_id = e.e_id
+GROUP BY e.name
+");
+
+while($row = $res->fetch_assoc()) {
+echo "<tr>
+<td>{$row['name']}</td>
+<td>{$row['avg_rating']}</td>
+</tr>";
+}
+?>
+
+</table>
+
+</div>
+
+<?php include '../footer.php'; ?>
