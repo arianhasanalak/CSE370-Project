@@ -12,7 +12,7 @@ $id = $_GET['id'];
 $uid = $_SESSION['user_id'];
 $role = $_SESSION['role'];
 
-// Customer can only edit own account
+// Restriction
 if ($role != 'admin' && $uid != $id) {
     echo "<div class='card'><h3>Access Denied</h3></div>";
     include '../footer.php';
@@ -25,25 +25,32 @@ if ($_POST) {
     $email = $_POST['email'];
     $phone = $_POST['phone'];
 
-    $conn->query("UPDATE User 
-                  SET name='$name', email='$email', phone='$phone' 
-                  WHERE user_id=$id");
+    $conn->query("
+    UPDATE user 
+    SET name='$name', email='$email', phone='$phone' 
+    WHERE user_id=$id
+    ");
 
     header("Location: view.php");
     exit();
 }
 
-// Fetch data
-$res = $conn->query("SELECT * FROM User WHERE user_id=$id");
+// Fetch
+$res = $conn->query("SELECT * FROM user WHERE user_id=$id");
 $row = $res->fetch_assoc();
 ?>
 
 <div class="card">
-<h2>Edit User</h2>
+<h2>Edit Profile</h2>
 
 <form method="POST">
+<label>Name</label>
 <input name="name" value="<?php echo $row['name']; ?>">
+
+<label>Email</label>
 <input name="email" value="<?php echo $row['email']; ?>">
+
+<label>Phone</label>
 <input name="phone" value="<?php echo $row['phone']; ?>">
 
 <button>Update</button>

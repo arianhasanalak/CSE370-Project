@@ -7,12 +7,13 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
 }
+
+$uid = $_SESSION['user_id'];
+$role = $_SESSION['role'];
 ?>
 
 <div class="card">
 <h2>Rentals</h2>
-
-<a href="add.php"><button>Add Rental</button></a><br><br>
 
 <table>
 <tr>
@@ -23,15 +24,66 @@ if (!isset($_SESSION['user_id'])) {
 </tr>
 
 <?php
-$res = $conn->query("
-SELECT r.rental_id, u.name AS customer, e.name AS equipment, r.status
-FROM Rental r
-JOIN Customer c ON r.customer_id = c.customer_id
-JOIN User u ON c.user_id = u.user_id
-JOIN Equipment e ON r.equipment_id = e.e_id
-");
 
+// ================= ADMIN =================
+if ($role == 'admin') {
+
+    $res = $conn->query("
+    SELECT r.rental_id, u.name AS customer, e.name AS equipment, r.status
+    FROM rental r
+    JOIN customer c ON r.customer_id = c.customer_id
+    JOIN user u ON c.user_id = u.user_id
+    JOIN equipment e ON r.equipment_id = e.e_id
+    ");
+
+}
+
+// ================= CUSTOMER =================
+else {
+
+    // 🔥 STEP 1: GET CUSTOMER ID FIRST
+    $cRes = $conn->query("SELECT customer_id FROM customer WHERE user_id=$uid");
+    $cRow = $cRes->fetch_assoc();
+
+    if (!$cRow) {
+        echo "<tr><td colspan='4'>No customer record found</td></tr>";
+    } else {
+
+        $customer_id = $cRow['customer_id'];
+
+        // 🔥 STEP 2: USE DIRECT MATCH (NO JOIN FILTER)
+        $res = $conn->query("
+        SELECT r.rental_id, e.name AS equipment, r.status
+        FROM rental r
+        JOIN equipment e ON r.equipment_id = e.e_id
+        WHERE r.customer_id = $customer_id
+        ");
+
+        while($row = $res->fetch_assoc()) {
+
+            echo "<tr>
+            <td>You</td>
+            <td>{$row['equipment']}</td>
+            <td>{$row['status']}</td>
+            <td>";
+
+            if ($row['status'] != 'Completed') {
+                echo "<a href='../payment/add.php?rental_id={$row['rental_id']}'><button>Pay</button></a>";
+            } else {
+                echo "Paid";
+            }
+
+            echo "</td></tr>";
+        }
+    }
+
+    include '../footer.php';
+    exit();
+}
+
+// ADMIN display
 while($row = $res->fetch_assoc()) {
+
 echo "<tr>
 <td>{$row['customer']}</td>
 <td>{$row['equipment']}</td>

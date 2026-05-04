@@ -12,6 +12,7 @@
     <div>
         <a href="/CSE370/index.php">Home</a>
         <a href="/CSE370/users/view.php">Users</a>
+        <a href="/CSE370/category/view.php">Category</a>
         <a href="/CSE370/equipment/view.php">Equipment</a>
         <a href="/CSE370/rental/view.php">Rentals</a>
         <a href="/CSE370/payment/view.php">Payments</a>
