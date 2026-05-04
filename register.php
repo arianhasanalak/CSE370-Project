@@ -7,12 +7,12 @@ if ($_POST) {
     $password = $_POST['password'];
     $phone = $_POST['phone'];
 
-    $conn->query("INSERT INTO User(name,email,password,phone)
+    $conn->query("INSERT INTO user(name,email,password,phone)
                   VALUES('$name','$email','$password','$phone')");
 
     $user_id = $conn->insert_id;
 
-    $conn->query("INSERT INTO Customer(user_id) VALUES($user_id)");
+    $conn->query("INSERT INTO customer(user_id) VALUES($user_id)");
 
     header("Location: login.php");
 }

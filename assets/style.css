@@ -1,66 +1,105 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f6f9;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #ACB6E5);
     margin: 0;
 }
 
+/* Container */
 .container {
-    width: 80%;
+    width: 85%;
     margin: auto;
     margin-top: 30px;
 }
 
-h2, h3 {
-    color: #333;
+/* Navbar */
+.navbar {
+    background: #2c3e50;
+    padding: 15px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
+.navbar a {
+    color: white;
+    margin-left: 15px;
+    font-weight: bold;
+}
+
+.navbar a:hover {
+    color: #1abc9c;
+}
+
+/* Card */
 .card {
     background: white;
-    padding: 20px;
+    padding: 25px;
     margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-a {
-    text-decoration: none;
-    color: #007BFF;
+/* Headings */
+h2 {
+    color: #2c3e50;
 }
 
-a:hover {
-    color: #0056b3;
+/* Inputs */
+input, select {
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
 }
 
+/* Buttons */
 button {
-    padding: 8px 15px;
-    background: #007BFF;
+    padding: 10px 18px;
+    background: #1abc9c;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
 button:hover {
-    background: #0056b3;
+    background: #16a085;
 }
 
-input {
-    padding: 8px;
-    width: 100%;
-    margin-bottom: 10px;
-}
-
+/* Tables */
 table {
     width: 100%;
     border-collapse: collapse;
-    background: white;
-}
-
-th, td {
-    padding: 10px;
-    border: 1px solid #ddd;
+    margin-top: 10px;
 }
 
 th {
-    background: #007BFF;
+    background: #2c3e50;
     color: white;
+    padding: 10px;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+    background: #f2f2f2;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+}
+
+/* Messages */
+.success {
+    color: green;
+}
+
+.error {
+    color: red;
 }
