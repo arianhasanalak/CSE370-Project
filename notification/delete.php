@@ -17,21 +17,22 @@ if (!$id) {
     exit();
 }
 
-//ADMIN 
+// ================= ADMIN =================
 if ($role == 'admin') {
 
     $conn->query("
-    DELETE FROM payment
-    WHERE payment_id=$id
+    DELETE FROM notification
+    WHERE notification_id=$id
     ");
 
     header("Location: view.php");
     exit();
 }
 
-//CUSTOMER
+// ================= CUSTOMER =================
 else {
 
+    // get customer_id
     $cres = $conn->query("
     SELECT customer_id
     FROM customer
@@ -42,23 +43,19 @@ else {
 
     $customer_id = $crow['customer_id'];
 
+    // verify ownership
     $check = $conn->query("
-    SELECT p.payment_id
-
-    FROM payment p
-
-    JOIN rental r
-    ON p.rental_id = r.rental_id
-
-    WHERE p.payment_id=$id
-    AND r.customer_id=$customer_id
+    SELECT notification_id
+    FROM notification
+    WHERE notification_id=$id
+    AND customer_id=$customer_id
     ");
 
     if ($check->num_rows > 0) {
 
         $conn->query("
-        DELETE FROM payment
-        WHERE payment_id=$id
+        DELETE FROM notification
+        WHERE notification_id=$id
         ");
     }
 

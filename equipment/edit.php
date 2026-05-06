@@ -3,48 +3,136 @@ session_start();
 include '../db.php';
 include '../header.php';
 
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
 $id = $_GET['id'];
 
+$res = $conn->query("
+SELECT *
+FROM equipment
+WHERE e_id=$id
+");
+
+$row = $res->fetch_assoc();
+
+if (!$row) {
+
+    echo "
+    <div class='card'>
+        <h3>Equipment not found</h3>
+    </div>
+    ";
+
+    include '../footer.php';
+    exit();
+}
+
+//SECURITY CHECK 
+if ($_SESSION['role'] != 'admin' &&
+    $row['owner_id'] != $_SESSION['user_id']) {
+
+    echo "
+    <div class='card'>
+        <h3>Access Denied</h3>
+    </div>
+    ";
+
+    include '../footer.php';
+    exit();
+}
+
 if ($_POST) {
+
     $name = $_POST['name'];
     $price = $_POST['price'];
     $category = $_POST['category'];
 
-    $conn->query("UPDATE Equipment 
-                  SET name='$name', pay_per_day='$price', category_id='$category'
-                  WHERE e_id=$id");
+    $sql = "
+    UPDATE equipment
+    SET
+        name='$name',
+        pay_per_day='$price',
+        category_id='$category'
+    WHERE e_id=$id
+    ";
 
-    header("Location: view.php");
-    exit();
+    if ($conn->query($sql)) {
+
+        header("Location: view.php");
+        exit();
+
+    } else {
+
+        echo "
+        <div class='error'>
+        ERROR: " . $conn->error . "
+        </div>
+        ";
+    }
 }
-
-$res = $conn->query("SELECT * FROM Equipment WHERE e_id=$id");
-$row = $res->fetch_assoc();
-
-$cat = $conn->query("SELECT * FROM Category");
 ?>
 
 <div class="card">
+
 <h2>Edit Equipment</h2>
 
 <form method="POST">
-<input name="name" value="<?php echo $row['name']; ?>">
-<input name="price" value="<?php echo $row['pay_per_day']; ?>">
+
+<label>Equipment Name</label>
+
+<input
+type="text"
+name="name"
+value="<?php echo $row['name']; ?>"
+required
+>
+
+<label>Price Per Day</label>
+
+<input
+type="number"
+name="price"
+value="<?php echo $row['pay_per_day']; ?>"
+required
+>
+
+<label>Category</label>
 
 <select name="category">
-<?php while($c = $cat->fetch_assoc()) { ?>
-<option value="<?php echo $c['category_id']; ?>"
-<?php if($c['category_id'] == $row['category_id']) echo "selected"; ?>>
-<?php echo $c['category_name']; ?>
-</option>
-<?php } ?>
+
+<?php
+
+$cres = $conn->query("SELECT * FROM category");
+
+while($c = $cres->fetch_assoc()) {
+
+    $selected = "";
+
+    if ($c['category_id'] == $row['category_id']) {
+        $selected = "selected";
+    }
+
+    echo "
+    <option value='{$c['category_id']}' $selected>
+    {$c['category_name']}
+    </option>
+    ";
+}
+?>
+
 </select>
 
-<button>Update</button>
+<br><br>
+
+<button type="submit">
+Update Equipment
+</button>
+
 </form>
 
-<br>
-<a href="view.php">Back</a>
 </div>
 
 <?php include '../footer.php'; ?>

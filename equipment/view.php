@@ -170,10 +170,16 @@ else {
     </a>
     ";
 
-    // DELETE OWN EQUIPMENT
+    // OWNER CONTROLS
     if ($r['owner_id'] == $uid) {
 
         echo "
+        <br><br>
+
+        <a href='edit.php?id={$r['e_id']}'>
+        <button>Edit My Equipment</button>
+        </a>
+
         <br><br>
 
         <a href='delete.php?id={$r['e_id']}'>
@@ -185,6 +191,46 @@ else {
 
 echo "</td>
 </tr>";
+
+// ================= SHOW REVIEWS =================
+$reviews = $conn->query("
+SELECT 
+    u.name,
+    r.rating,
+    r.comment
+
+FROM review r
+
+JOIN customer c
+ON r.customer_id = c.customer_id
+
+JOIN user u
+ON c.user_id = u.user_id
+
+WHERE r.equipment_id = {$r['e_id']}
+");
+
+if ($reviews->num_rows > 0) {
+
+    echo "
+    <tr>
+    <td colspan='5'>
+    <b>Reviews:</b><br>
+    ";
+
+    while($rev = $reviews->fetch_assoc()) {
+
+        echo "
+        <p>
+        <b>{$rev['name']}</b>
+        ({$rev['rating']}/5):
+        {$rev['comment']}
+        </p>
+        ";
+    }
+
+    echo "</td></tr>";
+}
 }
 ?>
 

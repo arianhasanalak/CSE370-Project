@@ -7,30 +7,117 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
 }
+
+$role = $_SESSION['role'];
+$uid = $_SESSION['user_id'];
 ?>
 
 <div class="card">
-<h2>Equipment Ratings</h2>
+
+<h2>Reviews</h2>
 
 <table>
+
 <tr>
 <th>Equipment</th>
-<th>Average Rating</th>
+<th>Customer</th>
+<th>Rating</th>
+<th>Comment</th>
+
+<?php
+if ($role == 'admin') {
+    echo "<th>Action</th>";
+}
+?>
+
 </tr>
 
 <?php
-$res = $conn->query("
-SELECT e.name, AVG(r.rating) AS avg_rating
-FROM Review r
-JOIN Equipment e ON r.equipment_id = e.e_id
-GROUP BY e.name
-");
 
+// ================= ADMIN =================
+if ($role == 'admin') {
+
+    $res = $conn->query("
+    SELECT 
+        r.review_id,
+        e.name AS equipment,
+        u.name AS customer,
+        r.rating,
+        r.comment
+
+    FROM review r
+
+    JOIN customer c
+    ON r.customer_id = c.customer_id
+
+    JOIN user u
+    ON c.user_id = u.user_id
+
+    JOIN equipment e
+    ON r.equipment_id = e.e_id
+    ");
+}
+
+// ================= CUSTOMER =================
+else {
+
+    $cres = $conn->query("
+    SELECT customer_id
+    FROM customer
+    WHERE user_id=$uid
+    ");
+
+    $crow = $cres->fetch_assoc();
+
+    $customer_id = $crow['customer_id'];
+
+    $res = $conn->query("
+    SELECT 
+        e.name AS equipment,
+        u.name AS customer,
+        r.rating,
+        r.comment
+
+    FROM review r
+
+    JOIN customer c
+    ON r.customer_id = c.customer_id
+
+    JOIN user u
+    ON c.user_id = u.user_id
+
+    JOIN equipment e
+    ON r.equipment_id = e.e_id
+
+    WHERE r.customer_id = $customer_id
+    ");
+}
+
+// ================= DISPLAY =================
 while($row = $res->fetch_assoc()) {
+
 echo "<tr>
-<td>{$row['name']}</td>
-<td>{$row['avg_rating']}</td>
-</tr>";
+
+<td>{$row['equipment']}</td>
+
+<td>{$row['customer']}</td>
+
+<td>{$row['rating']}/5</td>
+
+<td>{$row['comment']}</td>";
+
+if ($role == 'admin') {
+
+    echo "
+    <td>
+    <a href='delete.php?id={$row['review_id']}'>
+    <button>Delete</button>
+    </a>
+    </td>
+    ";
+}
+
+echo "</tr>";
 }
 ?>
 

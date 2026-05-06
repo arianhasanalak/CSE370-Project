@@ -16,6 +16,8 @@
         <a href="/CSE370/equipment/view.php">Equipment</a>
         <a href="/CSE370/rental/view.php">Rentals</a>
         <a href="/CSE370/payment/view.php">Payments</a>
+        <a href="/CSE370/notification/view.php">Notifications</a>
+        <a href="/CSE370/review/view.php">Reviews</a>
         <a href="/CSE370/logout.php">Logout</a>
     </div>
 </div>

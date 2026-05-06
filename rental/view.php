@@ -25,7 +25,7 @@ $role = $_SESSION['role'];
 
 <?php
 
-// ================= ADMIN =================
+//ADMIN
 if ($role == 'admin') {
 
     $res = $conn->query("
@@ -38,10 +38,9 @@ if ($role == 'admin') {
 
 }
 
-// ================= CUSTOMER =================
+//CUSTOMER
 else {
 
-    // 🔥 STEP 1: GET CUSTOMER ID FIRST
     $cRes = $conn->query("SELECT customer_id FROM customer WHERE user_id=$uid");
     $cRow = $cRes->fetch_assoc();
 
@@ -51,7 +50,6 @@ else {
 
         $customer_id = $cRow['customer_id'];
 
-        // 🔥 STEP 2: USE DIRECT MATCH (NO JOIN FILTER)
         $res = $conn->query("
         SELECT r.rental_id, e.name AS equipment, r.status
         FROM rental r
