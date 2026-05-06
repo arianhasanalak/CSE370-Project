@@ -14,13 +14,19 @@ $role = $_SESSION['role'];
 $category_id = $_GET['category_id'] ?? null;
 $search = $_GET['search'] ?? '';
 
+// ================= CATEGORY NAME =================
 $category_name = "";
 
 if ($category_id) {
 
-    $c = $conn->query("SELECT category_name FROM category WHERE category_id=$category_id");
+    $c = $conn->query("
+    SELECT category_name
+    FROM category
+    WHERE category_id=$category_id
+    ");
 
     if ($c && $c->num_rows > 0) {
+
         $crow = $c->fetch_assoc();
         $category_name = $crow['category_name'];
     }
@@ -49,6 +55,7 @@ if ($category_id && $category_name) {
 
 <br><br>
 
+<!-- SEARCH -->
 <form method="GET">
 
 <?php
@@ -57,8 +64,12 @@ if ($category_id) {
 }
 ?>
 
-<input type="text" name="search" placeholder="Search equipment..."
-value="<?php echo $search; ?>">
+<input
+type="text"
+name="search"
+placeholder="Search equipment..."
+value="<?php echo $search; ?>"
+>
 
 <button type="submit">Search</button>
 
@@ -68,8 +79,9 @@ value="<?php echo $search; ?>">
 
 <?php
 
+// ================= QUERY =================
 $query = "
-SELECT
+SELECT 
     e.e_id,
     e.name,
     e.pay_per_day,
@@ -78,7 +90,10 @@ SELECT
     c.category_name
 
 FROM equipment e
-JOIN category c ON e.category_id = c.category_id
+
+JOIN category c
+ON e.category_id = c.category_id
+
 WHERE 1=1
 ";
 
@@ -94,6 +109,7 @@ $res = $conn->query($query);
 ?>
 
 <table>
+
 <tr>
 <th>Name</th>
 <th>Category</th>
@@ -103,52 +119,77 @@ $res = $conn->query($query);
 </tr>
 
 <?php
+
 while($r = $res->fetch_assoc()) {
 
-    echo "<tr>
-    <td>{$r['name']}</td>
-    <td>{$r['category_name']}</td>
-    <td>{$r['pay_per_day']}</td>
-    <td>{$r['availability']}</td>
-    <td>";
+echo "<tr>
 
-    if ($role == 'admin') {
+<td>{$r['name']}</td>
+
+<td>{$r['category_name']}</td>
+
+<td>{$r['pay_per_day']}</td>
+
+<td>{$r['availability']}</td>
+
+<td>";
+
+// ================= ADMIN =================
+if ($role == 'admin') {
+
+    echo "
+    <a href='edit.php?id={$r['e_id']}'>Edit</a>
+    |
+    <a href='delete.php?id={$r['e_id']}'>Delete</a>
+    ";
+}
+
+// ================= CUSTOMER =================
+else {
+
+    // RENT BUTTON
+    if ($r['availability'] == 'Available') {
 
         echo "
-        <a href='edit.php?id={$r['e_id']}'>Edit</a> |
-        <a href='delete.php?id={$r['e_id']}'>Delete</a>
+        <a href='../rental/add.php?equipment_id={$r['e_id']}'>
+        <button>Rent</button>
+        </a>
         ";
 
     } else {
 
-        if ($r['availability'] == 'Available') {
-
-            echo "
-            <a href='../rental/add.php?equipment_id={$r['e_id']}'>
-            <button>Rent</button>
-            </a>
-            ";
-
-        } else {
-            echo "Currently Rented";
-        }
-
-        if ($r['owner_id'] == $uid) {
-
-            echo "
-            <br><br>
-            <a href='delete.php?id={$r['e_id']}'>
-            <button>Delete My Equipment</button>
-            </a>
-            ";
-        }
+        echo "Currently Rented";
     }
 
-    echo "</td></tr>";
+    // REVIEW BUTTON
+    echo "
+    <br><br>
+
+    <a href='../review/add.php?equipment_id={$r['e_id']}'>
+    <button>Review</button>
+    </a>
+    ";
+
+    // DELETE OWN EQUIPMENT
+    if ($r['owner_id'] == $uid) {
+
+        echo "
+        <br><br>
+
+        <a href='delete.php?id={$r['e_id']}'>
+        <button>Delete My Equipment</button>
+        </a>
+        ";
+    }
+}
+
+echo "</td>
+</tr>";
 }
 ?>
 
 </table>
+
 </div>
 
 <?php include '../footer.php'; ?>
