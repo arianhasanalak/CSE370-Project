@@ -14,7 +14,7 @@ $role = $_SESSION['role'];
 $category_id = $_GET['category_id'] ?? null;
 $search = $_GET['search'] ?? '';
 
-// ================= CATEGORY NAME =================
+//CATEGORY NAME
 $category_name = "";
 
 if ($category_id) {
@@ -79,7 +79,7 @@ value="<?php echo $search; ?>"
 
 <?php
 
-// ================= QUERY =================
+//QUERY
 $query = "
 SELECT 
     e.e_id,
@@ -134,7 +134,7 @@ echo "<tr>
 
 <td>";
 
-// ================= ADMIN =================
+//ADMIN 
 if ($role == 'admin') {
 
     echo "
@@ -144,7 +144,7 @@ if ($role == 'admin') {
     ";
 }
 
-// ================= CUSTOMER =================
+//CUSTOMER
 else {
 
     // RENT BUTTON
@@ -192,7 +192,7 @@ else {
 echo "</td>
 </tr>";
 
-// ================= SHOW REVIEWS =================
+//SHOW REVIEWS
 $reviews = $conn->query("
 SELECT 
     u.name,
