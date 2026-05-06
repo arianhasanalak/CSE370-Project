@@ -8,35 +8,52 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// only admin OR allow customer (your choice)
-$role = $_SESSION['role'];
-
-// get rental from URL
-$rental = $_GET['rental_id'] ?? '';
+$rental = $_GET['rental_id'] ?? null;
 
 if (!$rental) {
-    echo "<div class='card'><h3>No rental selected</h3></div>";
+    echo "<div class='card'><h3>Invalid rental.</h3></div>";
     include '../footer.php';
     exit();
 }
+
+$info = $conn->query("
+SELECT
+    r.rental_date,
+    r.return_date,
+    e.pay_per_day,
+    e.name AS equipment
+
+FROM rental r
+JOIN equipment e ON r.equipment_id = e.e_id
+WHERE r.rental_id = $rental
+");
+
+$data = $info->fetch_assoc();
+
+$days = (strtotime($data['return_date']) - strtotime($data['rental_date'])) / (60 * 60 * 24);
+
+if ($days <= 0) {
+    $days = 1;
+}
+
+$total = $days * $data['pay_per_day'];
 
 if ($_POST) {
 
     $status = $_POST['status'];
     $method = $_POST['method'];
 
-    // insert payment
     $conn->query("
-    INSERT INTO payment(rental_id, status, method)
-    VALUES($rental, '$status', '$method')
+    INSERT INTO payment(rental_id, status, method, total_cost)
+    VALUES($rental, '$status', '$method', '$total')
     ");
 
-    // get customer_id
-    $res = $conn->query("SELECT customer_id FROM rental WHERE rental_id=$rental");
+    $res = $conn->query("SELECT customer_id, equipment_id FROM rental WHERE rental_id=$rental");
     $row = $res->fetch_assoc();
-    $customer_id = $row['customer_id'];
 
-    // create notification
+    $customer_id = $row['customer_id'];
+    $equipment_id = $row['equipment_id'];
+
     $message = "Payment successful for Rental ID $rental";
 
     $conn->query("
@@ -44,17 +61,19 @@ if ($_POST) {
     VALUES($customer_id, '$message', NOW(), 'Unread')
     ");
 
-    // update rental status (optional but good)
     $conn->query("UPDATE rental SET status='Completed' WHERE rental_id=$rental");
 
-    echo "<p class='success'>Payment successful and notification sent!</p>";
+    $conn->query("UPDATE equipment SET availability='Available' WHERE e_id=$equipment_id");
+
+    echo "<p class='success'>Payment successful!</p>";
 }
 ?>
 
 <div class="card">
 <h2>Make Payment</h2>
 
-<p>Rental ID: <?php echo $rental; ?></p>
+<p><b>Equipment:</b> <?php echo $data['equipment']; ?></p>
+<p><b>Total Cost:</b> <?php echo $total; ?></p>
 
 <form method="POST">
 
@@ -74,9 +93,6 @@ if ($_POST) {
 <button>Pay Now</button>
 
 </form>
-
-<br>
-<a href="../rental/view.php">Back</a>
 
 </div>
 

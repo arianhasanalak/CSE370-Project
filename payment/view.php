@@ -19,11 +19,11 @@ $role = $_SESSION['role'];
 <tr>
 <th>Payment ID</th>
 <th>Equipment</th>
+<th>Total Cost</th>
 <th>Status</th>
 <th>Method</th>
 
 <?php
-// admin sees customer name
 if ($role == 'admin') {
     echo "<th>Customer</th>";
 }
@@ -33,19 +33,18 @@ if ($role == 'admin') {
 
 <?php
 
-// ================= ADMIN =================
 if ($role == 'admin') {
 
     $res = $conn->query("
-    SELECT 
+    SELECT
         p.payment_id,
+        p.total_cost,
         u.name AS customer,
         e.name AS equipment,
         p.status,
         p.method
 
     FROM payment p
-
     JOIN rental r ON p.rental_id = r.rental_id
     JOIN customer c ON r.customer_id = c.customer_id
     JOIN user u ON c.user_id = u.user_id
@@ -53,31 +52,22 @@ if ($role == 'admin') {
     ");
 
 }
-
-// ================= CUSTOMER =================
 else {
 
-    // get customer_id
     $cres = $conn->query("SELECT customer_id FROM customer WHERE user_id=$uid");
     $crow = $cres->fetch_assoc();
-
-    if (!$crow) {
-        echo "<tr><td colspan='5'>Customer not found</td></tr>";
-        include '../footer.php';
-        exit();
-    }
 
     $customer_id = $crow['customer_id'];
 
     $res = $conn->query("
-    SELECT 
+    SELECT
         p.payment_id,
+        p.total_cost,
         e.name AS equipment,
         p.status,
         p.method
 
     FROM payment p
-
     JOIN rental r ON p.rental_id = r.rental_id
     JOIN equipment e ON r.equipment_id = e.e_id
 
@@ -85,20 +75,20 @@ else {
     ");
 }
 
-// display
 while($row = $res->fetch_assoc()) {
 
-echo "<tr>
-<td>{$row['payment_id']}</td>
-<td>{$row['equipment']}</td>
-<td>{$row['status']}</td>
-<td>{$row['method']}</td>";
+    echo "<tr>
+    <td>{$row['payment_id']}</td>
+    <td>{$row['equipment']}</td>
+    <td>{$row['total_cost']}</td>
+    <td>{$row['status']}</td>
+    <td>{$row['method']}</td>";
 
-if ($role == 'admin') {
-    echo "<td>{$row['customer']}</td>";
-}
+    if ($role == 'admin') {
+        echo "<td>{$row['customer']}</td>";
+    }
 
-echo "</tr>";
+    echo "</tr>";
 }
 ?>
 
