@@ -12,14 +12,14 @@ $id = $_GET['id'];
 $uid = $_SESSION['user_id'];
 $role = $_SESSION['role'];
 
-// Restriction
+
 if ($role != 'admin' && $uid != $id) {
     echo "<div class='card'><h3>Access Denied</h3></div>";
     include '../footer.php';
     exit();
 }
 
-// Update
+
 if ($_POST) {
     $name = $_POST['name'];
     $email = $_POST['email'];
@@ -35,7 +35,7 @@ if ($_POST) {
     exit();
 }
 
-// Fetch
+
 $res = $conn->query("SELECT * FROM user WHERE user_id=$id");
 $row = $res->fetch_assoc();
 ?>

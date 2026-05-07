@@ -17,7 +17,6 @@ if (!$id) {
     exit();
 }
 
-// ================= ADMIN =================
 if ($role == 'admin') {
 
     $conn->query("
@@ -29,7 +28,6 @@ if ($role == 'admin') {
     exit();
 }
 
-// ================= CUSTOMER =================
 else {
 
     // get customer_id
@@ -43,7 +41,6 @@ else {
 
     $customer_id = $crow['customer_id'];
 
-    // verify ownership
     $check = $conn->query("
     SELECT notification_id
     FROM notification

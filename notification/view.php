@@ -36,7 +36,6 @@ if ($role == 'admin') {
 
 <?php
 
-// ================= ADMIN =================
 if ($role == 'admin') {
 
     $res = $conn->query("

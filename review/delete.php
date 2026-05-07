@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// admin only
+
 if ($_SESSION['role'] != 'admin') {
     header("Location: view.php");
     exit();

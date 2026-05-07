@@ -17,7 +17,6 @@ $role = $_SESSION['role'];
 
 <?php
 
-// ================= ADMIN =================
 if ($role == 'admin') {
 
     $res = $conn->query("
@@ -49,7 +48,6 @@ if ($role == 'admin') {
 }
 
 
-// ================= CUSTOMER =================
 else {
 
     $res = $conn->query("SELECT * FROM user WHERE user_id=$uid");

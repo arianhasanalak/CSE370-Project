@@ -8,7 +8,6 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// admin only
 if ($_SESSION['role'] != 'admin') {
 
     echo "
@@ -28,7 +27,6 @@ if (!$id) {
     exit();
 }
 
-// get category data
 $res = $conn->query("
 SELECT *
 FROM category
@@ -49,7 +47,6 @@ if (!$row) {
     exit();
 }
 
-// update
 if ($_POST) {
 
     $name = $_POST['name'];

@@ -24,7 +24,7 @@ if (!$equipment_id) {
     exit();
 }
 
-// ================= SUBMIT REVIEW =================
+
 if ($_POST) {
 
     $rating = $_POST['rating'];

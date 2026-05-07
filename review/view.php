@@ -55,7 +55,7 @@ if ($role == 'admin') {
     ");
 }
 
-// ================= CUSTOMER =================
+
 else {
 
     $res = $conn->query("
@@ -77,7 +77,7 @@ else {
     ");
 }
 
-// ================= DISPLAY =================
+
 while($row = $res->fetch_assoc()) {
 
 echo "<tr>
