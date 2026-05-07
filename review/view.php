@@ -39,57 +39,41 @@ if ($role == 'admin') {
 
     $res = $conn->query("
     SELECT 
-        r.review_id,
+        rv.review_id,
         e.name AS equipment,
         u.name AS customer,
-        r.rating,
-        r.comment
+        rv.rating,
+        rv.comment
 
-    FROM review r
-
-    JOIN customer c
-    ON r.customer_id = c.customer_id
+    FROM review rv
 
     JOIN user u
-    ON c.user_id = u.user_id
+    ON rv.user_id = u.user_id
 
     JOIN equipment e
-    ON r.equipment_id = e.e_id
+    ON rv.equipment_id = e.e_id
     ");
 }
 
 // ================= CUSTOMER =================
 else {
 
-    $cres = $conn->query("
-    SELECT customer_id
-    FROM customer
-    WHERE user_id=$uid
-    ");
-
-    $crow = $cres->fetch_assoc();
-
-    $customer_id = $crow['customer_id'];
-
     $res = $conn->query("
     SELECT 
         e.name AS equipment,
         u.name AS customer,
-        r.rating,
-        r.comment
+        rv.rating,
+        rv.comment
 
-    FROM review r
-
-    JOIN customer c
-    ON r.customer_id = c.customer_id
+    FROM review rv
 
     JOIN user u
-    ON c.user_id = u.user_id
+    ON rv.user_id = u.user_id
 
     JOIN equipment e
-    ON r.equipment_id = e.e_id
+    ON rv.equipment_id = e.e_id
 
-    WHERE r.customer_id = $customer_id
+    WHERE rv.user_id = $uid
     ");
 }
 

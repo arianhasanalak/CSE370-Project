@@ -134,7 +134,7 @@ echo "<tr>
 
 <td>";
 
-//ADMIN 
+//ADMIN
 if ($role == 'admin') {
 
     echo "
@@ -196,18 +196,15 @@ echo "</td>
 $reviews = $conn->query("
 SELECT 
     u.name,
-    r.rating,
-    r.comment
+    rv.rating,
+    rv.comment
 
-FROM review r
-
-JOIN customer c
-ON r.customer_id = c.customer_id
+FROM review rv
 
 JOIN user u
-ON c.user_id = u.user_id
+ON rv.user_id = u.user_id
 
-WHERE r.equipment_id = {$r['e_id']}
+WHERE rv.equipment_id = {$r['e_id']}
 ");
 
 if ($reviews->num_rows > 0) {
