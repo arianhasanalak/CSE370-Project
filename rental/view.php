@@ -13,9 +13,11 @@ $role = $_SESSION['role'];
 ?>
 
 <div class="card">
+
 <h2>Rentals</h2>
 
 <table>
+
 <tr>
 <th>Customer</th>
 <th>Equipment</th>
@@ -25,75 +27,134 @@ $role = $_SESSION['role'];
 
 <?php
 
-//ADMIN
+// ================= ADMIN =================
 if ($role == 'admin') {
 
     $res = $conn->query("
-    SELECT r.rental_id, u.name AS customer, e.name AS equipment, r.status
-    FROM rental r
-    JOIN customer c ON r.customer_id = c.customer_id
-    JOIN user u ON c.user_id = u.user_id
-    JOIN equipment e ON r.equipment_id = e.e_id
-    ");
+    SELECT 
+        r.rental_id,
+        r.customer_id,
+        r.equipment_id,
+        r.status,
+        u.name AS customer,
+        e.name AS equipment
 
+    FROM rental r
+
+    JOIN customer c
+    ON r.customer_id = c.customer_id
+
+    JOIN user u
+    ON c.user_id = u.user_id
+
+    JOIN equipment e
+    ON r.equipment_id = e.e_id
+    ");
 }
 
-//CUSTOMER
+// ================= CUSTOMER =================
 else {
 
-    $cRes = $conn->query("SELECT customer_id FROM customer WHERE user_id=$uid");
-    $cRow = $cRes->fetch_assoc();
+    // get customer id
+    $cres = $conn->query("
+    SELECT customer_id
+    FROM customer
+    WHERE user_id=$uid
+    ");
 
-    if (!$cRow) {
-        echo "<tr><td colspan='4'>No customer record found</td></tr>";
-    } else {
+    $crow = $cres->fetch_assoc();
 
-        $customer_id = $cRow['customer_id'];
+    $customer_id = $crow['customer_id'];
 
-        $res = $conn->query("
-        SELECT r.rental_id, e.name AS equipment, r.status
-        FROM rental r
-        JOIN equipment e ON r.equipment_id = e.e_id
-        WHERE r.customer_id = $customer_id
-        ");
+    $res = $conn->query("
+    SELECT 
+        r.rental_id,
+        r.customer_id,
+        r.equipment_id,
+        r.status,
+        e.name AS equipment
 
-        while($row = $res->fetch_assoc()) {
+    FROM rental r
 
-            echo "<tr>
-            <td>You</td>
-            <td>{$row['equipment']}</td>
-            <td>{$row['status']}</td>
-            <td>";
+    JOIN equipment e
+    ON r.equipment_id = e.e_id
 
-            if ($row['status'] != 'Completed') {
-                echo "<a href='../payment/add.php?rental_id={$row['rental_id']}'><button>Pay</button></a>";
-            } else {
-                echo "Paid";
-            }
-
-            echo "</td></tr>";
-        }
-    }
-
-    include '../footer.php';
-    exit();
+    WHERE r.customer_id = $customer_id
+    ");
 }
 
-// ADMIN display
+// ================= DISPLAY =================
 while($row = $res->fetch_assoc()) {
 
-echo "<tr>
-<td>{$row['customer']}</td>
+echo "<tr>";
+
+// customer/admin name
+if ($role == 'admin') {
+    echo "<td>{$row['customer']}</td>";
+} else {
+    echo "<td>You</td>";
+}
+
+echo "
 <td>{$row['equipment']}</td>
+
 <td>{$row['status']}</td>
+
 <td>
-<a href='delete.php?id={$row['rental_id']}'>Delete</a>
+";
+
+// ================= PAYMENT BUTTON =================
+if ($row['status'] == 'Pending') {
+
+    echo "
+    <a href='../payment/add.php?rental_id={$row['rental_id']}'>
+    <button>Pay</button>
+    </a>
+
+    <br><br>
+
+    <a href='cancel.php?id={$row['rental_id']}'>
+    <button>Cancel</button>
+    </a>
+    ";
+}
+
+// ================= COMPLETED =================
+elseif ($row['status'] == 'Completed') {
+
+    echo "
+    Paid
+
+    <br><br>
+
+    <a href='delete.php?id={$row['rental_id']}'>
+    <button>Delete</button>
+    </a>
+    ";
+}
+
+// ================= CANCELLED =================
+elseif ($row['status'] == 'Cancelled') {
+
+    echo "
+    Cancelled
+
+    <br><br>
+
+    <a href='delete.php?id={$row['rental_id']}'>
+    <button>Delete</button>
+    </a>
+    ";
+}
+
+echo "
 </td>
 </tr>";
 }
 ?>
 
 </table>
+
 </div>
 
 <?php include '../footer.php'; ?>

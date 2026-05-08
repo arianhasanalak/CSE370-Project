@@ -17,11 +17,11 @@ if (!$id) {
     exit();
 }
 
-//GET REVIEW 
+//GET RENTAL
 $res = $conn->query("
 SELECT *
-FROM review
-WHERE review_id=$id
+FROM rental
+WHERE rental_id=$id
 ");
 
 $row = $res->fetch_assoc();
@@ -31,10 +31,22 @@ if (!$row) {
     exit();
 }
 
-//CUSTOMER SECURITY
+//CUSTOMER CHECK
 if ($role != 'admin') {
 
-    if ($row['user_id'] != $uid) {
+    // get customer id from logged in user
+    $cres = $conn->query("
+    SELECT customer_id
+    FROM customer
+    WHERE user_id=$uid
+    ");
+
+    $crow = $cres->fetch_assoc();
+
+    $customer_id = $crow['customer_id'];
+
+    // only own rentals
+    if ($row['customer_id'] != $customer_id) {
 
         echo "
         <script>
@@ -47,10 +59,18 @@ if ($role != 'admin') {
     }
 }
 
-//DELETE REVIEW
+//CANCEL RENTAL
 $conn->query("
-DELETE FROM review
-WHERE review_id=$id
+UPDATE rental
+SET status='Cancelled'
+WHERE rental_id=$id
+");
+
+//MAKE EQUIPMENT AVAILABLE
+$conn->query("
+UPDATE equipment
+SET availability='Available'
+WHERE e_id={$row['equipment_id']}
 ");
 
 header("Location: view.php");

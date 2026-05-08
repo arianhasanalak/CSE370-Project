@@ -43,7 +43,7 @@ body {
     transition: 0.3s;
 }
 
-/* 🔥 HOVER UPGRADE */
+/*  HOVER UPGRADE */
 .card:hover {
     transform: translateY(-5px);
 }

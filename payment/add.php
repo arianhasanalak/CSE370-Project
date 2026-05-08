@@ -8,89 +8,175 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$rental = $_GET['rental_id'] ?? null;
+$uid = $_SESSION['user_id'];
 
-if (!$rental) {
-    echo "<div class='card'><h3>Invalid rental.</h3></div>";
+$rental_id = $_GET['rental_id'] ?? '';
+
+if (!$rental_id) {
+
+    echo "
+    <div class='card'>
+        <h3>Invalid Rental</h3>
+    </div>
+    ";
+
     include '../footer.php';
     exit();
 }
 
-$info = $conn->query("
-SELECT
+// GET RENTAL 
+$res = $conn->query("
+SELECT 
+    r.rental_id,
     r.rental_date,
     r.return_date,
-    e.pay_per_day,
-    e.name AS equipment
+    r.equipment_id,
+    e.name AS equipment,
+    e.pay_per_day
 
 FROM rental r
-JOIN equipment e ON r.equipment_id = e.e_id
-WHERE r.rental_id = $rental
+
+JOIN equipment e
+ON r.equipment_id = e.e_id
+
+WHERE r.rental_id = $rental_id
 ");
 
-$data = $info->fetch_assoc();
+if ($res->num_rows == 0) {
 
-$days = (strtotime($data['return_date']) - strtotime($data['rental_date'])) / (60 * 60 * 24);
+    echo "
+    <div class='card'>
+        <h3>Rental not found</h3>
+    </div>
+    ";
+
+    include '../footer.php';
+    exit();
+}
+
+$data = $res->fetch_assoc();
+
+//CALCULATE DAYS
+$start = strtotime($data['rental_date']);
+$end = strtotime($data['return_date']);
+
+$days = ($end - $start) / (60 * 60 * 24);
 
 if ($days <= 0) {
     $days = 1;
 }
 
+// TOTAL COST
 $total = $days * $data['pay_per_day'];
 
+//PAYMENT SUBMIT
 if ($_POST) {
 
     $status = $_POST['status'];
     $method = $_POST['method'];
 
+    //  INSERT PAYMENT 
     $conn->query("
-    INSERT INTO payment(rental_id, status, method, total_cost)
-    VALUES($rental, '$status', '$method', '$total')
+    INSERT INTO payment(
+        status,
+        method,
+        rental_id,
+        total_cost
+    )
+    VALUES(
+        '$status',
+        '$method',
+        $rental_id,
+        $total
+    )
     ");
 
-    $res = $conn->query("SELECT customer_id, equipment_id FROM rental WHERE rental_id=$rental");
-    $row = $res->fetch_assoc();
-
-    $customer_id = $row['customer_id'];
-    $equipment_id = $row['equipment_id'];
-
-    $message = "Payment successful for Rental ID $rental";
+    // CREATE NOTIFICATION 
+    $message = "
+    Payment completed for {$data['equipment']}.
+    Total Cost: $total
+    ";
 
     $conn->query("
-    INSERT INTO notification(customer_id, message, date, status)
-    VALUES($customer_id, '$message', NOW(), 'Unread')
+    INSERT INTO notification(
+        message,
+        date,
+        status,
+        user_id
+    )
+    VALUES(
+        '$message',
+        CURDATE(),
+        'Unread',
+        $uid
+    )
     ");
 
-    $conn->query("UPDATE rental SET status='Completed' WHERE rental_id=$rental");
+    //  COMPLETE RENTAL 
+    $conn->query("
+    UPDATE rental
+    SET status='Completed'
+    WHERE rental_id=$rental_id
+    ");
 
-    $conn->query("UPDATE equipment SET availability='Available' WHERE e_id=$equipment_id");
+    // MAKE EQUIPMENT AVAILABLE 
+    $conn->query("
+    UPDATE equipment
+    SET availability='Available'
+    WHERE e_id={$data['equipment_id']}
+    ");
 
-    echo "<p class='success'>Payment successful!</p>";
+    header("Location: view.php");
+    exit();
 }
 ?>
 
 <div class="card">
-<h2>Make Payment</h2>
 
-<p><b>Equipment:</b> <?php echo $data['equipment']; ?></p>
-<p><b>Total Cost:</b> <?php echo $total; ?></p>
+<h2>Payment</h2>
+
+<p>
+<b>Equipment:</b>
+<?php echo $data['equipment']; ?>
+</p>
+
+<p>
+<b>Rental Days:</b>
+<?php echo $days; ?>
+</p>
+
+<p>
+<b>Total Cost:</b>
+<?php echo $total; ?>
+</p>
 
 <form method="POST">
 
 <label>Status</label>
-<select name="status">
+
+<select name="status" required>
 <option value="Paid">Paid</option>
 </select>
 
-<label>Method</label>
-<select name="method">
-<option>Cash</option>
-<option>Card</option>
-<option>Online</option>
+<br><br>
+
+<label>Payment Method</label>
+
+<select name="method" required>
+
+<option value="">Select Method</option>
+
+<option value="Cash">Cash</option>
+<option value="Card">Card</option>
+<option value="Online">Online</option>
+
 </select>
 
 <br><br>
-<button>Pay Now</button>
+
+<button type="submit">
+Confirm Payment
+</button>
 
 </form>
 

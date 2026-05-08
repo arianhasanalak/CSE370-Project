@@ -17,11 +17,11 @@ if (!$id) {
     exit();
 }
 
-//GET REVIEW 
+// ================= GET NOTIFICATION =================
 $res = $conn->query("
 SELECT *
-FROM review
-WHERE review_id=$id
+FROM notification
+WHERE notification_id=$id
 ");
 
 $row = $res->fetch_assoc();
@@ -31,7 +31,7 @@ if (!$row) {
     exit();
 }
 
-//CUSTOMER SECURITY
+// ================= SECURITY =================
 if ($role != 'admin') {
 
     if ($row['user_id'] != $uid) {
@@ -47,12 +47,14 @@ if ($role != 'admin') {
     }
 }
 
-//DELETE REVIEW
+// ================= UPDATE STATUS =================
 $conn->query("
-DELETE FROM review
-WHERE review_id=$id
+UPDATE notification
+SET status='Read'
+WHERE notification_id=$id
 ");
 
+// ================= REDIRECT =================
 header("Location: view.php");
 exit();
 ?>
